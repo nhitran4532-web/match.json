@@ -1,0 +1,25 @@
+name: Auto Update Gavang JSON
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # Chạy tự động mỗi 10 phút
+  workflow_dispatch: # Cho phép bạn bấm nút chạy bằng tay
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get latest data from PHP
+        run: |
+          curl -s "http://gavangbd.free.nf/live.php" > match.json
+
+      - name: Save changes to GitHub
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add match.json
+          git commit -m "Cập nhật danh sách trận đấu mới" || exit 0
+          git push
