@@ -8,55 +8,50 @@ on:
 jobs:
   update:
     runs-on: ubuntu-latest
-    # Thêm dòng này để khẳng định quyền hạn một lần nữa
     permissions:
       contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          # Sử dụng Token mặc định của GitHub để có quyền Ghi
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch and Transform Data
         run: |
           curl -s "https://api-gavang.gvtv1.com/v1/streams" | jq '{
-            id: "gavang_pro",
-            name: "GÀ VÀNG TV LIVE",
+            id: "gavang_full",
+            name: "LỊCH THI ĐẤU GÀ VÀNG",
             image: { type: "cover", url: "https://gavang6.live/images/header/gavangtv-logo-v2.png" },
             groups: [{
-              id: "group-live",
-              name: "🔴 TRẬN ĐẤU ĐANG DIỄN RA",
+              id: "group-all",
+              name: "⚽ DANH SÁCH TRẬN ĐẤU",
               display: "vertical",
               grid_number: 2,
               channels: (if .data == null then [] else [.data[] | {
                 id: ("ch-" + (.id|tostring)),
-                name: ((if .is_live then "🔴 " else "🕒 " end) + .team_1 + " vs " + .team_2),
+                name: ((if .is_live then "🔴 LIVE: " else "🕒 " + .time + " - " end) + .team_1 + " vs " + .team_2),
                 type: "single",
                 display: "thumbnail-only",
                 image: { url: .team_1_logo, display: "contain" },
-                sources: [{
+                sources: (if .is_live then [{
                   id: ("src-" + (.id|tostring)),
-                  name: "Gavang TV",
+                  name: "Link Trực Tiếp",
                   contents: [{
                     id: ("cnt-" + (.id|tostring)),
-                    name: (.title // "Trực tiếp bóng đá"),
+                    name: .title,
                     streams: [{
                       id: "strm-main",
                       name: "Link Chính",
                       stream_links: [{
                         id: "lnk-main",
-                        name: "HLS High",
+                        name: "HLS",
                         type: "hls",
                         url: .source_live,
-                        request_headers: [
-                          {key: "Referer", value: "https://gavang6.live/"},
-                          {key: "User-Agent", value: "Mozilla/5.0"}
-                        ]
+                        request_headers: [{key: "Referer", value: "https://gavang6.live/"}]
                       }]
                     }]
                   }]
-                }]
+                }] else [] end)
               }] end)
             }]
           }' > match.json
@@ -66,6 +61,5 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add match.json
-          # Thêm cờ xác thực để tránh lỗi quyền ghi
-          git commit -m "Update match.json" || exit 0
+          git commit -m "Cập nhật lịch thi đấu mới nhất" || exit 0
           git push origin main
