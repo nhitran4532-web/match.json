@@ -1,17 +1,19 @@
 {
-  "id": "gavang_full",
+  "id": "gavang_test",
   "name": "LỊCH THI ĐẤU GÀ VÀNG",
-  "image": {
-    "type": "cover",
-    "url": "https://gavang6.live/images/header/gavangtv-logo-v2.png"
-  },
-  "groups": [
-    {
-      "id": "group-all",
-      "name": "⚽ DANH SÁCH TRẬN ĐẤU",
-      "display": "vertical",
-      "grid_number": 2,
-      "channels": []
-    }
-  ]
+  "image": { "type": "cover", "url": "https://gavang6.live/images/header/gavangtv-logo-v2.png" },
+  "groups": [{
+    "id": "group-all",
+    "name": "⚽ DANH SÁCH TRẬN ĐẤU",
+    "display": "vertical",
+    "grid_number": 2,
+    "channels": [{
+      "id": "test-1",
+      "name": "🕒 19:00 - Trận Đấu Thử Nghiệm (OK)",
+      "type": "single",
+      "display": "thumbnail-only",
+      "image": { "url": "https://gavang6.live/images/header/gavangtv-logo-v2.png" },
+      "sources": []
+    }]
+  }]
 }
