@@ -1,6 +1,10 @@
 name: Auto Update Gavang JSON
+
 on:
+  schedule:
+    - cron: '*/30 * * * *'
   workflow_dispatch:
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -9,31 +13,51 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Create Test Data
+
+      - name: Fetch and Transform Data
         run: |
-          echo '{
-            "id": "gavang_test",
-            "name": "LỊCH THI ĐẤU GÀ VÀNG",
-            "image": { "type": "cover", "url": "https://gavang6.live/images/header/gavangtv-logo-v2.png" },
-            "groups": [{
-              "id": "group-all",
-              "name": "⚽ DANH SÁCH TRẬN ĐẤU",
-              "display": "vertical",
-              "grid_number": 2,
-              "channels": [{
-                "id": "test-1",
-                "name": "🕒 19:00 - Trận Đấu Thử Nghiệm (OK)",
-                "type": "single",
-                "display": "thumbnail-only",
-                "image": { "url": "https://gavang6.live/images/header/gavangtv-logo-v2.png" },
-                "sources": []
-              }]
+          curl -s "https://api-gavang.gvtv1.com/v1/streams" | jq '{
+            id: "gavang_pro",
+            name: "GÀ VÀNG TV LIVE",
+            image: { type: "cover", url: "https://gavang6.live/images/header/gavangtv-logo-v2.png" },
+            groups: [{
+              id: "group-live",
+              name: "⚽ DANH SÁCH TRẬN ĐẤU",
+              display: "vertical",
+              grid_number: 2,
+              channels: (if .data == null then [] else [.data[] | {
+                id: .id,
+                name: ((if .is_live then "🔴 LIVE: " else "🕒 " + .start_date[11:16] + " - " end) + .title),
+                type: "single",
+                display: "thumbnail-only",
+                image: { url: .team_1_logo, display: "contain" },
+                sources: (if .is_live then [{
+                  id: ("src-" + .id),
+                  name: "Link Chính",
+                  contents: [{
+                    id: ("cnt-" + .id),
+                    name: .title,
+                    streams: [{
+                      id: "strm-main",
+                      name: "HLS",
+                      stream_links: [{
+                        id: "lnk-main",
+                        name: "Server 1",
+                        type: "hls",
+                        url: .source_live,
+                        request_headers: [{key: "Referer", value: "https://gavang6.live/"}]
+                      }]
+                    }]
+                  }]
+                }] else [] end)
+              }] end)
             }]
           }' > match.json
+
       - name: Save changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add match.json
-          git commit -m "Test match list" || exit 0
+          git commit -m "Update match list and live links" || exit 0
           git push origin main
