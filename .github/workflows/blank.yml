@@ -2,8 +2,8 @@ name: Auto Update Gavang JSON
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Cập nhật mỗi 30 phút
-  workflow_dispatch: # Cho phép nhấn nút chạy ngay
+    - cron: '*/30 * * * *' # Tự động cập nhật mỗi 30 phút
+  workflow_dispatch: # Nút bấm để chạy ngay lập tức
 
 jobs:
   update:
@@ -12,9 +12,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Create JSON Data
+      - name: Fetch and Transform Data
         run: |
-          # Đoạn này sẽ lấy dữ liệu trực tiếp từ Gà Vàng và tự đóng gói thành JSON chuẩn MonPlayer
+          # Lấy dữ liệu và dùng JQ để biến đổi sang cấu trúc MonPlayer
           curl -s "https://api-gavang.gvtv1.com/v1/streams" | jq '{
             id: "gavang_pro",
             name: "GÀ VÀNG TV LIVE",
@@ -35,7 +35,7 @@ jobs:
                   name: "Gavang TV",
                   contents: [{
                     id: ("cnt-" + (.id|tostring)),
-                    name: (.title // "Trực tiếp"),
+                    name: (.title // "Trực tiếp bóng đá"),
                     streams: [{
                       id: "strm-main",
                       name: "Link Chính",
@@ -61,5 +61,5 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add match.json
-          git commit -m "Update match.json" || exit 0
+          git commit -m "Cập nhật match.json trực tiếp từ API" || exit 0
           git push
