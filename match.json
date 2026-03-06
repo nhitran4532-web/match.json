@@ -1,8 +1,5 @@
 {
-  "channels": [
-    {
-      "name": "Real Soacha Cundinamarca vs Inter Palmira",
-      "url": "https://live.alilicloud.com/live/3a89c2865349cef85ca4d000b012468/playlist.m3u8"
-    }
-  ]
+  "id": "redirect_gavang",
+  "name": "Gà Vàng TV Live",
+  "redirect": "http://gavangbd.free.nf/live.php"
 }
