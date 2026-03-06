@@ -2,7 +2,7 @@ name: Auto Update Gavang JSON
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # Tự động cập nhật mỗi 10 phút
+    - cron: '*/30 * * * *' # Cập nhật mỗi 30 phút
   workflow_dispatch: # Cho phép nhấn nút chạy ngay
 
 jobs:
@@ -12,14 +12,54 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Get latest data from PHP
+      - name: Create JSON Data
         run: |
-          curl -s "http://gavangbd.free.nf/live.php" > match.json
+          # Đoạn này sẽ lấy dữ liệu trực tiếp từ Gà Vàng và tự đóng gói thành JSON chuẩn MonPlayer
+          curl -s "https://api-gavang.gvtv1.com/v1/streams" | jq '{
+            id: "gavang_pro",
+            name: "GÀ VÀNG TV LIVE",
+            image: { type: "cover", url: "https://gavang6.live/images/header/gavangtv-logo-v2.png" },
+            groups: [{
+              id: "group-live",
+              name: "🔴 TRẬN ĐẤU ĐANG DIỄN RA",
+              display: "vertical",
+              grid_number: 2,
+              channels: [.data[] | {
+                id: ("ch-" + (.id|tostring)),
+                name: ((if .is_live then "🔴 " else "🕒 " end) + .team_1 + " vs " + .team_2),
+                type: "single",
+                display: "thumbnail-only",
+                image: { url: .team_1_logo, display: "contain" },
+                sources: [{
+                  id: ("src-" + (.id|tostring)),
+                  name: "Gavang TV",
+                  contents: [{
+                    id: ("cnt-" + (.id|tostring)),
+                    name: (.title // "Trực tiếp"),
+                    streams: [{
+                      id: "strm-main",
+                      name: "Link Chính",
+                      stream_links: [{
+                        id: "lnk-main",
+                        name: "HLS High",
+                        type: "hls",
+                        url: .source_live,
+                        request_headers: [
+                          {key: "Referer", value: "https://gavang6.live/"},
+                          {key: "User-Agent", value: "Mozilla/5.0"}
+                        ]
+                      }]
+                    }]
+                  }]
+                }]
+              }]
+            }]
+          }' > match.json
 
       - name: Save changes to GitHub
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add match.json
-          git commit -m "Cập nhật danh sách trận đấu mới" || exit 0
+          git commit -m "Update match.json" || exit 0
           git push
