@@ -2,8 +2,8 @@ name: Auto Update Gavang JSON
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # Chạy tự động mỗi 10 phút
-  workflow_dispatch: # Cho phép bạn bấm nút chạy bằng tay
+    - cron: '*/10 * * * *' # Tự động cập nhật mỗi 10 phút
+  workflow_dispatch: # Cho phép nhấn nút chạy ngay
 
 jobs:
   update:
