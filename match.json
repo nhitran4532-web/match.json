@@ -1,14 +1,14 @@
 {
-  "id": "gavang_pro",
-  "name": "GÀ VÀNG TV LIVE",
+  "id": "gavang_full",
+  "name": "LỊCH THI ĐẤU GÀ VÀNG",
   "image": {
     "type": "cover",
     "url": "https://gavang6.live/images/header/gavangtv-logo-v2.png"
   },
   "groups": [
     {
-      "id": "group-live",
-      "name": "🔴 TRẬN ĐẤU ĐANG DIỄN RA",
+      "id": "group-all",
+      "name": "⚽ DANH SÁCH TRẬN ĐẤU",
       "display": "vertical",
       "grid_number": 2,
       "channels": []
